@@ -4,7 +4,21 @@ module.exports = {
   content: ["./App.tsx", "./components/**/*.{js,jsx,ts,tsx}", "./app/**/*.{js,jsx,ts,tsx}"],
   presets: [require("nativewind/preset")],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        space: ["SpaceGrotesk_400Regular"],
+        spaceBold: ["SpaceGrotesk_700Bold"],
+        radio: ["RadioCanadaBig_400Regular"],
+        radioBold: ["RadioCanadaBig_700Bold"],
+      },
+       colors: {
+        primary: "#1B1B1B",    //fundo preto claro
+        secondary: "#19804B", //verde
+        terciary: "#292929",   //cinza claro
+        neutro: "#AEAEAE",
+        border: "#145A32",  //borda verde escuro
+      },
+    },
   },
   plugins: [],
 }
