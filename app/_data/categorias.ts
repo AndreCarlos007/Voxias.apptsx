@@ -4,24 +4,24 @@ export const categorias: CategoriaType[] = [
   {
     id: 1,
     nome: "Animais",
-    cor: "bg-[#19804B]",
+    cor: "bg-[#3B6331]",
     itens: [
       {
         id: 1,
         nome: "Cachorro",
-        cor: "bg-[#19804B]",
+        cor: "bg-[#3B6331]",
         img: require("../../assets/icons/cachorro.png"),
       },
       {
         id: 2,
         nome: "Gato",
-        cor: "bg-[#19804B]",
+        cor: "bg-[#3B6331]",
         img: require("../../assets/images/logo.png"),
       },
       {
         id: 3,
         nome: "Cavalo",
-        cor: "bg-[#19804B]",
+        cor: "bg-[#3B6331]",
         img: require("../../assets/images/logo.png"),
       },
     ],

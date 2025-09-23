@@ -13,7 +13,7 @@ module.exports = {
       },
        colors: {
         primary: "#1B1B1B",    //fundo preto claro
-        secondary: "#19804B", //verde
+        secondary: "#3b6331", //verde
         terciary: "#292929",   //cinza claro
         neutro: "#AEAEAE",
         border: "#145A32",  //borda verde escuro

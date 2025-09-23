@@ -1,21 +1,19 @@
-import { Image, View } from "react-native";
+import { Image, View, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Header() {
   return (
     <SafeAreaView>
-      <View className="static h-28 bg-terciary justify-center items-center">
-        <Image
-          source={require("../../assets/images/logo.png")}
-          resizeMode="contain"
-          className="mb-1"
-        />
+      <View className="static h-32 bg-terciary text-center pb-4 justify-center items-center">
+        <Text className="text-5xl text-secondary font-radioBold">
+                      VOX<Text className="text-white">IA</Text>
+                    </Text>
       </View>
 
-      <View className="mt-[-4rem]">
+      <View className="mt-[-2.8rem]">
         <Image
-          source={require("../../assets/images/vinhas.png")}
-          className="min-w-full h-32"
+          source={require("../../assets/images/vinhas9.png")}
+          className="min-w-full h-24"
         />
       </View>
     </SafeAreaView>
