@@ -5,6 +5,8 @@ import { ItemType } from "../../types";
 
 import ItemCard from "./ItemCard";
 
+import * as Speech from 'expo-speech';
+
 type Props = {
   visible: boolean;
   item: ItemType | null;
@@ -19,6 +21,16 @@ export default function ItemModal({
   onActionPress,
 }: Props) {
   const [contadores, setContadores] = useState<{ [key: number]: number }>({});
+
+  const speak = () => {
+    
+    if (item && item.nome) {
+      Speech.speak(item.nome, {
+        language: "pt-BR",
+        
+      })
+    }
+  };
 
   useEffect(() => {
     if (item && contadores[item.id] === undefined) {
@@ -53,7 +65,10 @@ export default function ItemModal({
 
 
           <View className="absolute bottom-4 left-0 right-0 flex-row justify-between items-center px-6">
-            <TouchableOpacity onPress={incrementar} className="p-2">
+            <TouchableOpacity onPress={() => {
+              speak();
+              incrementar();
+            }} className="p-2">
               <Image
                 source={require("../../assets/icons/sound.png")}
                 className="w-12 h-12"
