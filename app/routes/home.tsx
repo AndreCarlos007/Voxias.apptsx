@@ -22,7 +22,7 @@ export default function Home() {
     <View className="flex-1 bg-primary">
       <Header />
 
-      <ScrollView>
+      <ScrollView className="pt-8">
         {categorias.map((categoria) => (
           <Categoria
             key={categoria.id}
