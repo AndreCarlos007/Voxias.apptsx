@@ -1,8 +1,16 @@
-import { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { loginUser } from "../../services/authService";
 
 export default function Login() {
   const router = useRouter();
@@ -13,26 +21,36 @@ export default function Login() {
 
   const [erroEmail, setErroEmail] = useState("");
   const [erroSenha, setErroSenha] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  function validarLogin() {
+  async function realizarLogin() {
     let valido = true;
 
     if (!email.includes("@") || !email.includes(".")) {
       setErroEmail("Digite um email válido");
       valido = false;
-    } else {
-      setErroEmail("");
-    }
+    } else setErroEmail("");
 
     if (senha.length < 6) {
       setErroSenha("A senha deve ter no mínimo 6 caracteres");
       valido = false;
-    } else {
-      setErroSenha("");
-    }
+    } else setErroSenha("");
 
-    if (valido) {
-      alert("Login realizado com sucesso!");
+    if (!valido) return;
+
+    setLoading(true);
+
+    try {
+      
+      const res = await loginUser({ email, senha });
+      
+      router.replace("/routes/home");
+    } catch (err: any) {
+      console.log("Erro no login:", err.response?.data || err.message || err);
+      const msg = err.response?.data?.message || "Credenciais inválidas.";
+      Alert.alert("Erro", msg);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -53,13 +71,10 @@ export default function Login() {
           </Text>
 
           <View className="w-full">
-            <Text className="text-neutro font-spaceBold mb-2 text-base">
-              Email
-            </Text>
-
+      
+            <Text className="text-neutro font-spaceBold mb-2 text-base">Email</Text>
             <View className="bg-primary h-14 rounded-2xl flex-row items-center px-4">
               <Ionicons name="mail-outline" size={22} color="#b5b5b5" />
-
               <TextInput
                 placeholder="Digite seu email"
                 placeholderTextColor="#b5b5b5"
@@ -70,20 +85,12 @@ export default function Login() {
                 onChangeText={setEmail}
               />
             </View>
+            {erroEmail ? <Text className="text-red-500 mt-1">{erroEmail}</Text> : null}
 
-            {erroEmail ? (
-              <Text className="text-red-500 font-spaceRegular mt-1">
-                {erroEmail}
-              </Text>
-            ) : null}
-
-            <Text className="text-neutro font-spaceBold mb-2 text-base mt-6">
-              Senha
-            </Text>
-
+       
+            <Text className="text-neutro font-spaceBold mb-2 text-base mt-6">Senha</Text>
             <View className="bg-primary h-14 rounded-2xl flex-row items-center px-4">
               <Ionicons name="lock-closed-outline" size={22} color="#b5b5b5" />
-
               <TextInput
                 placeholder="Digite sua senha"
                 placeholderTextColor="#b5b5b5"
@@ -92,40 +99,27 @@ export default function Login() {
                 value={senha}
                 onChangeText={setSenha}
               />
-
               <TouchableOpacity onPress={() => setMostrarSenha(!mostrarSenha)}>
-                <Ionicons
-                  name={mostrarSenha ? "eye-off-outline" : "eye-outline"}
-                  size={22}
-                  color="#b5b5b5"
-                />
+                <Ionicons name={mostrarSenha ? "eye-off-outline" : "eye-outline"} size={22} color="#b5b5b5" />
               </TouchableOpacity>
             </View>
-
-            {erroSenha ? (
-              <Text className="text-red-500 font-spaceRegular mt-1">
-                {erroSenha}
-              </Text>
-            ) : null}
+            {erroSenha ? <Text className="text-red-500 mt-1">{erroSenha}</Text> : null}
 
             <TouchableOpacity
-              onPress={validarLogin}
+              disabled={loading}
+              onPress={realizarLogin}
               className="w-full h-14 bg-secondary rounded-2xl justify-center items-center mt-8"
             >
-              <Text className="text-white text-lg font-spaceBold">Entrar</Text>
+              {loading ? <ActivityIndicator color="#fff" /> : <Text className="text-white text-lg font-spaceBold">Entrar</Text>}
             </TouchableOpacity>
 
             <View className="flex-row justify-center mt-4">
-              <Text className="text-neutro text-base font-spaceRegular">
-                Não tem conta?{" "}
-              </Text>
-
+              <Text className="text-neutro text-base">Não tem conta? </Text>
               <TouchableOpacity onPress={() => router.push("/auth/cadastro")}>
-                <Text className="text-secondary text-base font-spaceBold">
-                  Cadastre-se
-                </Text>
+                <Text className="text-secondary text-base font-spaceBold">Cadastre-se</Text>
               </TouchableOpacity>
             </View>
+
           </View>
         </View>
       </View>

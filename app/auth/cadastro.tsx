@@ -1,8 +1,16 @@
-import { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { registerUser } from "../../services/authService";
 
 export default function Cadastro() {
   const router = useRouter();
@@ -20,39 +28,64 @@ export default function Cadastro() {
   const [erroSenha, setErroSenha] = useState("");
   const [erroConfirmar, setErroConfirmar] = useState("");
 
-  function validar() {
+  const [loading, setLoading] = useState(false);
+
+  async function cadastrar() {
     let valido = true;
 
     if (nome.trim().length < 3) {
       setErroNome("Digite seu nome completo");
       valido = false;
-    } else {
-      setErroNome("");
-    }
+    } else setErroNome("");
 
     if (!email.includes("@") || !email.includes(".")) {
       setErroEmail("Digite um email válido");
       valido = false;
-    } else {
-      setErroEmail("");
-    }
+    } else setErroEmail("");
 
     if (senha.length < 6) {
       setErroSenha("A senha deve ter no mínimo 6 caracteres");
       valido = false;
-    } else {
-      setErroSenha("");
-    }
+    } else setErroSenha("");
 
     if (confirmarSenha !== senha) {
       setErroConfirmar("As senhas não coincidem");
       valido = false;
-    } else {
-      setErroConfirmar("");
-    }
+    } else setErroConfirmar("");
 
-    if (valido) {
-      alert("Cadastro realizado com sucesso!");
+    if (!valido) return;
+
+    setLoading(true);
+
+    try {
+      
+      const payload = {
+        email,
+        senha,
+        confirmarSenha,
+      };
+
+      const response = await registerUser(payload);
+
+   
+      if (response.status === 200 || response.status === 201) {
+        Alert.alert("Sucesso", "Conta criada com sucesso! Faça login para continuar.", [
+          { text: "OK", onPress: () => router.replace("/auth/login") },
+        ]);
+      } else {
+       
+        Alert.alert("Erro", "Não foi possível cadastrar. Tente novamente.");
+      }
+    } catch (err: any) {
+    
+      console.log("Erro no register:", err.response?.data || err.message || err);
+      const message =
+        err.response?.data?.message ||
+        err.response?.data?.errors?.[0] ||
+        "Erro ao cadastrar. Verifique os dados.";
+      Alert.alert("Erro", message);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -73,13 +106,10 @@ export default function Cadastro() {
           </Text>
 
           <View>
-            <Text className="text-neutro font-spaceBold mb-2 text-base">
-              Nome completo
-            </Text>
-
+        
+            <Text className="text-neutro font-spaceBold mb-2 text-base">Nome completo</Text>
             <View className="flex-row items-center bg-primary h-14 rounded-2xl px-4">
               <Ionicons name="person-outline" size={22} color="#b5b5b5" />
-
               <TextInput
                 placeholder="Digite seu nome completo"
                 placeholderTextColor="#b5b5b5"
@@ -88,17 +118,10 @@ export default function Cadastro() {
                 onChangeText={setNome}
               />
             </View>
+            {erroNome ? <Text className="text-red-500 mt-1">{erroNome}</Text> : null}
 
-            {erroNome ? (
-              <Text className="text-red-500 font-spaceRegular mt-1">
-                {erroNome}
-              </Text>
-            ) : null}
-
-            <Text className="text-neutro font-spaceBold mb-2 text-base mt-6">
-              Email
-            </Text>
-
+     
+            <Text className="text-neutro font-spaceBold mb-2 text-base mt-6">Email</Text>
             <View className="flex-row items-center bg-primary h-14 rounded-2xl px-4">
               <Ionicons name="mail-outline" size={22} color="#b5b5b5" />
               <TextInput
@@ -111,25 +134,14 @@ export default function Cadastro() {
                 onChangeText={setEmail}
               />
             </View>
-            {erroEmail ? (
-              <Text className="text-red-500 font-spaceRegular mt-1">
-                {erroEmail}
-              </Text>
-            ) : null}
+            {erroEmail ? <Text className="text-red-500 mt-1">{erroEmail}</Text> : null}
 
+          
             <View className="flex-row justify-between mt-6">
               <View className="w-[48%]">
-                <Text className="text-neutro font-spaceBold mb-2 text-base">
-                  Senha
-                </Text>
-
+                <Text className="text-neutro font-spaceBold mb-2 text-base">Senha</Text>
                 <View className="flex-row items-center bg-primary h-14 rounded-2xl px-4">
-                  <Ionicons
-                    name="lock-closed-outline"
-                    size={22}
-                    color="#b5b5b5"
-                  />
-
+                  <Ionicons name="lock-closed-outline" size={22} color="#b5b5b5" />
                   <TextInput
                     placeholder="Senha"
                     placeholderTextColor="#b5b5b5"
@@ -138,37 +150,17 @@ export default function Cadastro() {
                     value={senha}
                     onChangeText={setSenha}
                   />
-
-                  <TouchableOpacity
-                    onPress={() => setMostrarSenha(!mostrarSenha)}
-                  >
-                    <Ionicons
-                      name={mostrarSenha ? "eye-off-outline" : "eye-outline"}
-                      size={22}
-                      color="#b5b5b5"
-                    />
+                  <TouchableOpacity onPress={() => setMostrarSenha(!mostrarSenha)}>
+                    <Ionicons name={mostrarSenha ? "eye-off-outline" : "eye-outline"} size={22} color="#b5b5b5" />
                   </TouchableOpacity>
                 </View>
-
-                {erroSenha ? (
-                  <Text className="text-red-500 font-spaceRegular mt-1">
-                    {erroSenha}
-                  </Text>
-                ) : null}
+                {erroSenha ? <Text className="text-red-500 mt-1">{erroSenha}</Text> : null}
               </View>
 
               <View className="w-[48%]">
-                <Text className="text-neutro font-spaceBold mb-2 text-base">
-                  Confirmar
-                </Text>
-
+                <Text className="text-neutro font-spaceBold mb-2 text-base">Confirmar</Text>
                 <View className="flex-row items-center bg-primary h-14 rounded-2xl px-4">
-                  <Ionicons
-                    name="lock-closed-outline"
-                    size={22}
-                    color="#b5b5b5"
-                  />
-
+                  <Ionicons name="lock-closed-outline" size={22} color="#b5b5b5" />
                   <TextInput
                     placeholder="Confirmar"
                     placeholderTextColor="#b5b5b5"
@@ -177,52 +169,29 @@ export default function Cadastro() {
                     value={confirmarSenha}
                     onChangeText={setConfirmarSenha}
                   />
-
-                  <TouchableOpacity
-                    onPress={() =>
-                      setMostrarConfirmarSenha(!mostrarConfirmarSenha)
-                    }
-                  >
-                    <Ionicons
-                      name={
-                        mostrarConfirmarSenha
-                          ? "eye-off-outline"
-                          : "eye-outline"
-                      }
-                      size={22}
-                      color="#b5b5b5"
-                    />
+                  <TouchableOpacity onPress={() => setMostrarConfirmarSenha(!mostrarConfirmarSenha)}>
+                    <Ionicons name={mostrarConfirmarSenha ? "eye-off-outline" : "eye-outline"} size={22} color="#b5b5b5" />
                   </TouchableOpacity>
                 </View>
-
-                {erroConfirmar ? (
-                  <Text className="text-red-500 font-spaceRegular mt-1">
-                    {erroConfirmar}
-                  </Text>
-                ) : null}
+                {erroConfirmar ? <Text className="text-red-500 mt-1">{erroConfirmar}</Text> : null}
               </View>
             </View>
 
             <TouchableOpacity
-              onPress={validar}
+              disabled={loading}
+              onPress={cadastrar}
               className="w-full h-14 bg-secondary rounded-2xl justify-center items-center mt-8"
             >
-              <Text className="text-white text-lg font-spaceBold">
-                Cadastrar
-              </Text>
+              {loading ? <ActivityIndicator color="#fff" /> : <Text className="text-white text-lg font-spaceBold">Cadastrar</Text>}
             </TouchableOpacity>
 
             <View className="flex-row justify-center mt-4">
-              <Text className="text-neutro text-base font-spaceRegular">
-                Já tem conta?{" "}
-              </Text>
-
+              <Text className="text-neutro text-base font-spaceRegular">Já tem conta? </Text>
               <TouchableOpacity onPress={() => router.push("/auth/login")}>
-                <Text className="text-secondary text-base font-spaceBold">
-                  Login
-                </Text>
+                <Text className="text-secondary text-base font-spaceBold">Login</Text>
               </TouchableOpacity>
             </View>
+
           </View>
         </View>
       </View>
